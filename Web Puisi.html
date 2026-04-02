@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pustaka Puisi - SeorangAing</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #0a0f1a;
+            --bg-secondary: #111827;
+            --accent-gold: #d4a853;
+            --accent-warm: #e8b86d;
+            --text-primary: #f5f0e6;
+            --text-secondary: #a8a092;
+            --card-bg: rgba(17, 24, 39, 0.85);
+            --glass: rgba(212, 168, 83, 0.08);
+        }
+        
+        body {
+            font-family: 'Lora', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Header */
+        header {
+            padding: 2rem;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(10, 15, 26, 0.95) 0%, transparent 100%);
+        }
+        
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-warm));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Search & Filter */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1rem 2rem 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(212, 168, 83, 0.2);
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-family: 'Lora', serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 30px rgba(212, 168, 83, 0.15);
+        }
+        
+        .search-box::before {
+            content: '⌕';
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+        }
+        
+        .filter-btn {
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(212, 168, 83, 0.2);
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-family: 'Lora', serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(212, 168, 83, 0.15);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+        
+        /* Poetry Grid */
+        .poetry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .poetry-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(212, 168, 83, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .poetry-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .poetry-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(212, 168, 83, 0.1);
+            border-color: rgba(212, 168, 83, 0.3);
+        }
+        
+        .poetry-card:hover::before {
+            opacity: 1;
+        }
+        
+        .poetry-card .category {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: var(--glass);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .poetry-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .poetry-card .author {
+            color: var(--accent-warm);
+            font-style: italic;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        .poetry-card .preview {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .poetry-card .read-more {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            color: var(--accent-gold);
+            font-size: 0.9rem;
+            transition: gap 0.3s ease;
+        }
+        
+        .poetry-card:hover .read-more {
+            gap: 1rem;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 15, 26, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 30px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid rgba(212, 168, 83, 0.2);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+        
+        .modal-header {
+            padding: 2.5rem 2.5rem 1.5rem;
+            border-bottom: 1px solid rgba(212, 168, 83, 0.1);
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            z-index: 1;
+        }
+        
+        .modal-header .category {
+            display: inline-block;
+            padding: 0.4rem 1.2rem;
+            background: var(--glass);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+        
+        .modal-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-warm));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .modal-header .author {
+            color: var(--accent-warm);
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(212, 168, 83, 0.1);
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            background: rgba(212, 168, 83, 0.2);
+            color: var(--accent-gold);
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            padding: 2.5rem;
+        }
+        
+        .poem-content {
+            font-size: 1.15rem;
+            line-height: 2;
+            color: var(--text-primary);
+            white-space: pre-line;
+            font-style: italic;
+        }
+        
+        .poem-content .line {
+            display: block;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: fadeInLine 0.5s ease forwards;
+        }
+        
+        @keyframes fadeInLine {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Reading Mode Toggle */
+        .reading-mode-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(212, 168, 83, 0.2);
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-family: 'Lora', serif;
+            cursor: pointer;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .reading-mode-toggle:hover {
+            background: rgba(212, 168, 83, 0.15);
+            border-color: var(--accent-gold);
+        }
+        
+        body.reading-mode {
+            background: #050810;
+        }
+        
+        body.reading-mode .poetry-card {
+            background: rgba(5, 8, 16, 0.9);
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(212, 168, 83, 0.1);
+            margin-top: 3rem;
+        }
+        
+        footer span {
+            color: var(--accent-gold);
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(212, 168, 83, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(212, 168, 83, 0.5);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .poetry-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .modal {
+                border-radius: 20px;
+            }
+            
+            .modal-header, .modal-body {
+                padding: 1.5rem;
+            }
+            
+            .modal-header h2 {
+                font-size: 1.6rem;
+            }
+            
+            .reading-mode-toggle {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.8rem 1.2rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+       
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+        
+        .no-results h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="content">
+        <header>
+            <h1 class="logo">PUSTAKA PUISI</h1>
+            <p class="tagline">Kumpulan Kata kata dan Puisi dari Seorang Aing</p>
+        </header>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Cari puisi atau penyair...">
+            </div>
+            <button class="filter-btn active" data-filter="semua">Semua</button>
+            <button class="filter-btn" data-filter="cinta">Cinta</button>
+            <button class="filter-btn" data-filter="Motivasi">Motivasi</button>
+            <button class="filter-btn" data-filter="kehidupan">Kehidupan</button>
+            <button class="filter-btn" data-filter="kerinduan">Kerinduan</button>
+            <button class="filter-btn" data-filter="alam">Alam</button>
+        </div>
+        
+        <main class="poetry-grid" id="poetryGrid">
+            <!-- Cards will be generated by JS -->
+        </main>
+        
+        <footer>
+            <p>Pustaka Puisi mufhri 2026 </p>
+           <span><p class="letter-signature">~ Menyimpan Rasa, Mengabdikan Kata</p></span> 
+        </footer>
+    </div>
+    
+    <button class="reading-mode-toggle" id="readingToggle">
+        <span id="toggleIcon">☽</span>
+        <span id="toggleText">Mode Baca</span>
+    </button>
+    
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="category" id="modalCategory"></span>
+                <h2 id="modalTitle"></h2>
+                <p class="author" id="modalAuthor"></p>
+                <button class="close-btn" id="closeModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="poem-content" id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <script type="module">
+        import * as THREE from 'three';
+        
+        
+        const poems = [
+            {
+                id: 1,
+                title: "Pulang",
+                author: "Tere Liye",
+                category: "kerinduan",
+                preview: "Aku ingin pulang ke kampung halaman, di mana senyum ibu masih hangat...",
+                content: `Aku ingin pulang
+Ke kampung halaman
+Di mana senyum ibu masih hangat
+Dan tawa ayah masih membahana
+
+Aku ingin pulang
+Ke tanah yang melahirkanku
+Di mana matahari pagi menyapa lembut
+Dan angin sore membawa cerita
+
+Tapi jalan masih panjang
+Dan langkah masih tertunda
+Mungkin nanti, mungkin esok
+Aku akan pulang...`
+            },
+            {
+                id: 2,
+                title: "Hujan",
+                author: "Sapardi Djoko Damono",
+                category: "alam",
+                preview: "Hujan ini akan membebaskan aku dari kerinduan yang menggunung...",
+                content: `Hujan ini akan membebaskan aku
+Dari kerinduan yang menggunung
+
+Setiap tetesnya adalah surat
+Dari langit yang tak bertepi
+Membawa berita dari tempat yang jauh
+
+Aku berdiri di bawahnya
+Membiarkan basah seluruh tubuh
+Mencoba memahami bahasa awan
+
+Dan dalam setiap rintikan
+Aku mendengar namamu
+Tersimpan rapi di antara tetes air
+Yang jatuh ke bumi`
+            },
+            {
+                id: 3,
+                title: "Aku Ingin",
+                author: "Sapardi Djoko Damono",
+                category: "cinta",
+                preview: "Aku ingin mencintaimu dengan sederhana, dengan kata yang tak sempat diucapkan...",
+                content: `Aku ingin mencintaimu dengan sederhana
+Dengan kata yang tak sempat diucapkan
+Kayu kepada api yang menjadikannya abu
+Aku ingin mencintaimu dengan sederhana
+Dengan isyarat yang tak sempat disampaikan
+Awan kepada hujan yang menjadikannya tiada
+
+Aku ingin mencintaimu dengan sederhana
+Dengan cara yang tak sempat dikerjakan
+Angin kepada daun yang menjatuhkannya
+Aku ingin mencintaimu dengan sederhana
+Dengan kata yang tak sempat diucapkan
+Kayu kepada api yang menjadikannya abu`
+            },
+            {
+                id: 4,
+                title: "Senja",
+                author: "W.S. Rendra",
+                category: "alam",
+                preview: "Di kala senja, matahari bersandar di pundak bukit yang jauh...",
+                content: `Di kala senja
+Matahari bersandar di pundak bukit yang jauh
+Burung-burung pulang ke sarang
+Menyimpan sayap untuk mimpi
+
+Di kala senja
+Aku duduk sendiri
+Menatap cakrawala yang berubah warna
+Dari biru menjadi jingga
+Dari jingga menjadi kelabu
+
+Di kala senja
+Aku bermenung
+Tentang hari yang berlalu
+Tentang hari yang akan datang`
+            },
+            {
+                id: 5,
+                title: "Sajak Putih",
+                author: "Chairil Anwar",
+                category: "kehidupan",
+                preview: "Biarlah aku melangkah, tetap kita berjalan, tidak dapat tidak...",
+                content: `Biarlah aku melangkah
+Tetap kita berjalan
+Tidak dapat tidak
+Kita mengejar masa depan
+
+Aku hanya seorang yang diperbudak
+Oleh kata-kata yang aku tulis
+Namun aku bebas
+Dalam setiap kata yang kuungkapkan
+
+Di atas kertas putih
+Aku menuangkan darah
+Di atas kertas putih
+Aku menuangkan jiwa
+
+Inilah sajakku
+Putih dan bersih
+Sebagai tanda
+Bahwa aku pernah ada`
+            },
+            {
+                id: 6,
+                title: "Doa",
+                author: "Amir Hamzah",
+                category: "kehidupan",
+                preview: "Tuhan, jika kami tak dapat berpaling dari dosa, janganlah kiranya...",
+                content: `Tuhan
+Jika kami tak dapat berpaling dari dosa
+Janganlah kiranya Engkau berpaling dari kami
+
+Kami adalah debu
+Yang terbang ditiup angin dosa
+Kami adalah daun
+Yang gugur di musim kemarau
+
+Namun jika air mata kami
+Masih ada yang tersisa
+Beri kami kekuatan
+Untuk menapaki jalan yang benar
+
+Tuhan
+Terimalah doa ini
+Sebagai bukti
+Bahwa kami masih mengharap rahmatMu`
+            },
+            {
+                id: 7,
+                title: "Mawar Hitam",
+                author: "W.S. Rendra",
+                category: "cinta",
+                preview: "Engkau mawar hitam yang tumbuh di hatiku, indah namun menyakitkan...",
+                content: `Engkau mawar hitam
+Yang tumbuh di hatiku
+Indah namun menyakitkan
+Wangi namun berduri
+
+Aku menyiramimu
+Dengan air mata
+Aku memupukmu
+Dengan kerinduan
+
+Namun engkau tetap
+Mawar hitam
+Yang tak bisa kuubah
+Menjadi mawar merah
+
+Mungkin memang begini takdirku
+Mencintai sesuatu
+Yang takkan pernah menjadi milikku`
+            },
+            {
+                id: 8,
+                title: "Benda-Benda",
+                author: "Goenawan Mohamad",
+                category: "kehidupan",
+                preview: "Benda-benda di sekelilingku, diam membisu, namun berbicara banyak...",
+                content: `Benda-benda di sekelilingku
+Diam membisu
+Namun berbicara banyak
+
+Kursi tua di sudut ruang
+Menyimpan cerita tentang orang-orang
+Yang pernah duduk di atasnya
+Tersenyum, menangis, atau bermenung
+
+Meja kayu dengan goresan pisau
+Saksi bisu perjamuan malam
+Ketika obrolan mengalir
+Dan gelas-gelas berdenting
+
+Benda-benda
+Adalah penyimpan memori
+Yang tak pernah berbohong`
+            },
+            {
+                id: 9,
+                title: "Surat Cinta",
+                author: "Sapardi Djoko Damono",
+                category: "cinta",
+                preview: "Aku menulis surat untukmu, meski tak tahu alamat tujuan...",
+                content: `Aku menulis surat untukmu
+Meski tak tahu alamat tujuan
+
+Setiap huruf adalah pelangi
+Yang kuukir di kertas waktu
+Setiap kata adalah bintang
+Yang kugantung di langit malam
+
+Aku menulis tentang senja
+Yang selalu kunantikan
+Aku menulis tentang fajar
+Yang selalu kuharapkan
+
+Surat ini mungkin tak sampai
+Kepadamu
+Namun setidaknya
+Aku telah menulis
+Tentang cinta yang tak bertuan`
+            },
+            {
+                id: 10,
+                title: "Bulan",
+                author: "Taufiq Ismail",
+                category: "alam",
+                preview: "Bulan di atas kepala, menerangi malam yang kelabu...",
+                content: `Bulan di atas kepala
+Menerangi malam yang kelabu
+
+Engkau adalah pelita
+Bagi yang tersesat dalam gelap
+Engkau adalah sahabat
+Bagi yang terjaga dalam sepi
+
+Bulan
+Yang selalu hadir
+Di setiap puisi cinta
+Di setiap lagu kerinduan
+
+Namun bulan juga
+Saksi bisu
+Pertemuan dan perpisahan
+Yang terjadi di bawah sinarnya`
+            },
+            {
+                id: 11,
+                title: "Persimpangan",
+                author: "Tere Liye",
+                category: "kehidupan",
+                preview: "Di persimpangan jalan, aku berdiri bingung, ke mana harus melangkah...",
+                content: `Di persimpangan jalan
+Aku berdiri bingung
+Ke mana harus melangkah
+
+Kiri adalah masa lalu
+Dengan kenangan yang masih segar
+Kanan adalah masa depan
+Dengan misteri yang menganga
+Depan adalah hari ini
+Dengan tawaran yang tak pasti
+
+Aku berdiri
+Di persimpangan jalan
+Mencoba memilih
+Arah yang benar
+
+Namun siapa yang tahu?
+Mungkin tidak ada jalan yang salah
+Hanya ada jalan yang berbeda`
+            },
+            {
+                id: 12,
+                title: "Rindu",
+                author: "Chairil Anwar",
+                category: "kerinduan",
+                preview: "Aku rindu, itu saja. Dua kata yang bermakna samudra...",
+                content: `Aku rindu
+Itu saja
+Dua kata yang bermakna samudra
+
+Rindu pada senyum yang pernah ada
+Rindu pada tawa yang telah padam
+Rindu pada cium yang tersisa
+Rindu pada peluk yang menghilang
+
+Aku rindu
+Pada waktu yang tak bisa kubelokkan
+Pada detik yang tak bisa kuulang
+
+Namun dalam rindu
+Aku menemukan kekuatan
+Untuk terus hidup
+Untuk terus mencinta`
+            },
+           {
+            id: 13,
+                title: "Tersembunyi",
+                author: "Mu Fahri",
+                category: "cinta",
+                preview: "Kau seperti hujan yang turun tanpa suara...",
+                content: ` Kau seperti hujan yang turun tanpa suara, tapi menyentuh bumi dengan kelembutan paling jujur. 
+                Gerakmu tenang, kata-katamu terjaga, dan caramu hadir membuatku sadar ada kekuatan besar dalam menjaga. 
+                Dalam sikapmu, aku melihat perempuan yang lebih memilih disembunyikan oleh Tuhan daripada ditampilkan oleh dunia. 
+                Bukan karena kau takut, tapi karna kau paham nilai dirimu tak bisa dilihat oleh Dunia melainkan oleh pandangan Tuhan yang tak pernah luput sedetik pun`
+            },
+            {
+              id: 14,
+                  title: "Dia Indah",
+                  author: "Mu Fahri",
+                  category: "cinta",
+                  preview: "Dia begitu indah, Dengan tatapan teduhnya...",
+                  content: `Dia begitu indah, 
+Dengan tatapan teduhnya, 
+Dengan senyum manis yg terukir di wajahnya, 
+Dengan suara merdu yang membuat orang terkesima. 
+
+Dia begitu indah, 
+Kapanpun aku melihatnya, 
+Dari sisi manapun aku menatapnya, 
+Bahkan di dlm foto, dia tetap sama indahnya. 
+
+Dia begitu indah, 
+Dia indah dari berbagai aspek, 
+Di luar, ada fisiknya yang indah  
+Di dalam, ada hati serta pikirannya yang jernih. 
+
+
+Dia begitu indah
+Tak kusangka aku jatuh hati padanya
+Hingga ku terpikir untuk dapat memilikinya
+Namun, pantaskah diri ini untuk bersamanya?`
+            },
+            {
+              id: 15,
+                  title: "Kamu",
+                  author: "Mu Fahri",
+                  category: "cinta",
+                  preview: "Kamu adalah alasanku tertidur dengan senyum indah di wajahku....",
+                  content: `Kamu adalah alasanku tertidur dengan senyum indah di wajahku 
+Dengan mata tertutup sayu namun penuh bahasa yg sunyi tentangmu
+Dengan doa yang merayu tuhan "1001 semoga" Agar bersatu dengan mu
+Alasanku memperbaiki diri dan tentu kamu tak pernah memintanya
+Hanya saja aku ingin pantas berada di sampingmu tanpa ragu sedikit pun dalam hatiku
+Kamu adalah alasanku meninggalkan hal-hal yg dulu berlebihan meski membuatku kehilangan banyak
+Aku bangkit dari keterpurukan yg bahka tak mampu kusebutkan
+Aku mulai melihat dunia dengan cahaya yg lebih lembut
+Kamu membuatku sadar segalanya terasa mungkin
+Kamu tidak menyelamatkan ku, tapi kamu membuatku ingin menyelamatkan diriku sendiri
+Ketika rasa itu menjadi perjalanan pulang paling dalam menuju versi terbaik diriku
+Dan jika suatu hari aku ditanya "apa alasanmu bertahan dihari-hari yang paling berat"
+Maka aku akan menjawab " Karena aku pernah mengenal seseorang yg membuatku ingin hidup dengan sungguh²`
+            },
+            {
+              id: 16,
+                  title: "Terakhir kalinya",
+                  author: "Mu Fahri",
+                  category: "cinta",
+                  preview: "Ini terakhir kalinya aku jatuh cinta Dan jika di izinkan.. Bolehkah kal ini denganmu? ",
+                  content: `Ini terakhir kalinya aku jatuh cinta
+Dan jika di izinkan.. Bolehkah kal ini denganmu? 
+Aku sedang memperbaiki diriku untuk Allah, dan diam² juga untuk mu
+Aku ingin kau tau: aku tak datang dengan tangan kosong 
+Nama mu hanya bisa kulangitkan walau aku sagat ingin bicara dengan mu
+Dan kalau boleh jujur...
+Aku menyukaimu seolah aku tak butuh mengirim pesan, seolah aku tak butuh memperhatikan. Padahal aku sagat membutuhkan itu
+Hanya saja aku ingin menjaga rasa ini
+Dan.. Aku tau ini mustahil, tapii... 
+Bukan kah Allah selalu mewujudkan hal mustahil dengan cara yg lebih mustahil lagi
+Seperti Ali yg mustahil memiliki Fatimah kemudian disatukan
+Seperti Musa yg bertemu Shafura, hanya karna ia melarikan diri justru menjadi jodoh yang sangat ia inginkan
+Memang aku bukan Ali bukan pula Musa, aku jauh dari itu... 
+Tapi bagaimana bisa aku ragu jika tuhanku adalah Dia, Allah. 
+Yang selalu merencanakan segala kemustahilan untuk hambaNya didepan sana
+Maka jika boleh aku meminta... Semoga saja kemustahilan itu adalah kamu
+Dan begitu, seni mengharapkan doa mengajarkan kita lebih dari sekedar menunggu. 
+Ia mengajrkan kita untuk menerima, untuk percaya dan yg terpenting, 
+Untuk memahani bahwa harapan yg tulus yg datang dari hati yg lapang, 
+Akan membawa kita pada tujuan yg lebih mulia. `
+            },
+            {
+              id: 17,
+                  title:"Rindu Tanpa Hak Milik",
+                  author:"Mu Fahri",
+                  category:"kerinduan",
+                  preview:"Rindu ini tumbuh tanpa pernah bertanya menetap diam di sudut kepala...",
+                  content:`Rindu ini tumbuh tanpa pernah bertanya
+menetap diam di sudut kepala
+aku menyebut namamu tanpa suara
+lalu belajar bertahan di jarak yang sama
+
+Malam datang tanpa membawa tanda
+selain sunyi yang semakin terasa
+aku berjalan di hari yang biasa
+sambil menyimpan rindu yang tak terbaca
+
+Tak ada pesan, tak ada jeda
+hanya ingatan yang kadang menyapa
+jika rindu harus tetap sederhana
+biarlah ia tinggal tanpa memaksa
+
+Aku tidak berharap waktu berubah arah
+atau semesta berpihak sepenuhnya
+cukup tahu, di satu masa
+kita pernah saling ada`
+            },
+            {
+              id: 18,
+              title:"Jarak yang Sama",
+              author:"Mu Fahri",
+              category:"cinta",
+              preview:"Kita tidak saling berjanji apa-apa hanya bertemu di waktu yang tidak sempurna...",
+              content:`Kita tidak saling berjanji apa-apa
+hanya bertemu di waktu yang tidak sempurna
+
+Aku menyebut namamu tanpa suara
+Namun menyimpannya rapi dalam kepala
+
+Bukan karena takut, bukan pula pura lupa
+hanya paham: tidak semua rasa harus dibaca
+
+Jika suatu hari kita kembali bersua
+biarlah rindu datang tanpa luka
+
+Aku tidak menunggu dengan doa yang memaksa
+cukup berjalan, sambil membawa namamu yang terus menggema`
+            },
+            {
+              id: 19,
+                  title:"Rindu di ujung waktu",
+                  author:"Mu Fahri",
+                  category:"kerinduan",
+                  preview:"Kala senja perlahan membisu, Kutulis namamu di langit biru...",
+                  content:`
+Kala senja perlahan membisu,
+Kutulis namamu di langit biru, 
+Angin berbisik lirih merayu,
+Membawa rinduku yang tak pernah layu.
+
+Malam datang membawa pilu,
+Di setiap bintang kutemukan bayangmu, 
+Suaramu terngiang seperti lagu,
+Yang temaniku dalam sepi yang beku.
+
+Waktu terus berlalu, tapi rasa tak juga sirna,
+Hatiku tetap berada di tempat yang sama, 
+Menunggu hadirmu dalam doa yang lama,
+Meski kutahu, mungkin kau tak merasa sama.
+
+Jika rindu ini harus kubawa,
+Biarlah ia menjadi doa, 
+Sebab mencintaimu tak perlu suara,
+Cukup dengan hati yang setia menjaga.`
+            },
+            {
+              id: 20,
+                  title:"Langkah yang Tak Kembali",
+                  author:"Mu Fahri",
+                  category:"Motivasi",
+                  preview:"Aku pernah hampir berhenti, tapi mimpi menepuk pundakku lagi, berkata, “jalanmu belum selesai di sini.”...",
+                  content:`Aku pernah hampir berhenti,
+tapi mimpi menepuk pundakku lagi,
+berkata, “jalanmu belum selesai di sini.”
+
+Meski lelah sering datang tiba-tiba,
+aku belajar bahwa luka tak selamanya hampa,
+kadang ia cuma cara semesta menguatkan jiwa.
+
+Maka biarlah aku terus melangkah,
+bukan untuk siapa, tapi karena percaya,
+setiap jatuh selalu membawa arah baru untuk bangkit lagi.`
+            },
+            {
+              id: 21,
+                  title:"Masih Akan ku Jalani",
+                  author:"Mu Fahri",
+                  category:"Motivasi",
+                  preview:"Pernah aku ingin menyerah di tengah jalan, saat semua terasa terlalu pelan...",
+                  content:`Pernah aku ingin menyerah di tengah jalan,
+saat semua terasa terlalu pelan.
+Namun hati berbisik penuh arti,
+“tak apa lambat, asal tetap berdiri.”
+
+Langit tak selalu biru di mata,
+kadang mendung datang bersama kecewa.
+Tapi hujan pun punya makna rahasia,
+bahwa tumbuh tak lahir dari bahagia semata.
+
+Kini langkahku mungkin masih gontai,
+tapi keyakinan ini takkan usai.
+Sebab setiap luka, setiap gagal, setiap hari,
+adalah tanda: aku masih berani.`
+            },
+            {
+              id: 22,
+              title:"Langkah yang Tak Pernah Padam",
+              author:"Mu Fahri",
+              category:"Motivasi",
+              preview:"Kadang aku lelah pada dunia yang bisu, langit terasa rendah, harapan semu...",
+              content:`Kadang aku lelah pada dunia yang bisu,
+langit terasa rendah, harapan semu.
+Namun dalam diam aku temukan arah,
+bahwa setiap jatuh pun punya berkah.
+
+Aku belajar dari luka yang lama,
+bahwa gagal bukan akhir cerita.
+Selama napas masih berirama,
+aku akan terus menulis mimpi di udara.
+
+Ada hari saat keyakinan terasa rapuh,
+namun hati berbisik, “kau tak boleh luruh.”
+Karena setiap badai yang datang bertamu,
+selalu pergi meninggalkan pelangi baru.
+
+Maka biarlah aku berjalan perlahan,
+menyulam doa di setiap keraguan.
+Sebab perjuangan bukan soal cepat sampai,
+tapi tentang tak berhenti meski tak mudah dicapai.`
+            },
+            {
+              id: 23,
+              title:"Karena Kamu",
+              author:"Mu Fahri",
+              category:"cinta",
+              preview:"Pernah aku hampir menyerah di tengah jalan, Namun bayangmu datang seperti cahaya pelan,",
+              content:`Pernah aku hampir menyerah di tengah jalan,
+Namun bayangmu datang seperti cahaya pelan, 
+Kau bukan alasan untuk berhenti di sini,
+Tapi alasan mengapa aku terus berdiri.
+
+Setiap langkahku mungkin tertatih,
+Namun di setiap lelah, ada namamu yang menatih, 
+Kau tak tahu, tapi dalam setiap doa yang kususun,
+Ada harap agar kelak kita disatukan di penghujung musim.
+
+Aku bekerja, berlari, dan berjuang dalam diam,
+Bukan untuk dunia, tapi untuk masa depan yang kuimpikan, 
+Agar saat tiba hari itu nanti,
+Aku bisa menatapmu dan berkata, "aku sudah di sini".
+
+Dan jika takdir berkenan menulis kisah kita,
+Biarlah cinta ini tumbuh di antara usaha dan doa, 
+Sebab mencintaimu bukan sekadar rasa,
+Tapi janji — untuk terus berjuang hingga waktunya tiba.`
+            },
+            {
+              id: 24,
+              title:"Yang tak Terganti",
+              author:"Mu Fahri",
+              category:"cinta",
+              preview:"Ada sesuatu yang diam dalam jiwa, Menetap tenang tanpa disapa...",
+              content:`Ada sesuatu yang diam dalam jiwa,
+Menetap tenang tanpa disapa,
+Meski tak terucap dengan bahasa,
+Namun tetap setia menjaga asa.
+
+Malam yang datang membawa bayang,
+Wajahnya hadir dalam tenang,
+Bintang menatap dengan cahaya terang,
+Membawa pesan yang tak terbilang.
+
+Aku hanya bisa terdiam dalam doa,
+Menitip namamu pada semesta,
+Walau waktu menjauhkan kita,
+Namamu kan terpatri tuk selamanya.`
+            },
+            {
+              id: 25,
+              title:"Jejak Waktu (2)",
+              author:"Mu Fahri",
+              category:"kehidupan",
+              preview:"Dalam detik yang tak terganti, Kenangan bernyanyi lirih sekali...",
+              content:`
+Dalam detik yang tak terganti,
+Kenangan bernyanyi lirih sekali,
+Bagai angin malam menyapa hati,
+Lembut, senyap, namun abadi.
+
+Kita pernah kecil, bebas berlari,
+Nengejar senja, tertawa riang sendiri,
+Dunia sederhana, tanpa beban berarti,
+Hanya pelangi dan mimpi menanti.
+
+Namun dewasa datang mengetuk sunyi,
+Membawa resah, luka, dan sepi,
+Setiap langkah terasa letih berdiri,
+Meski jiwa tetap mencari arti.
+
+Hidup tak selalu penuh cahaya,
+Kadang gelap menyelimuti rasa,
+Seperti hujan jatuh di malam yang hampa,
+Dingin menetes, tak ada suara.
+
+Waktu terus berjalan, tak pernah menoleh,
+Mengalir tenang, meski hati pedih,
+Dan kita hanya mampu mengenang perih,
+Sambil merajut harap di hari yang bersih.
+
+Andai waktu bisa kembali sebentar,
+Ingin ku peluk masa kecil yang sabar,
+Namun arus hidup tak bisa ditawar,
+Maka biarlah kenangan jadi lentera yang berputar.
+
+Sebab meski sendu kerap menghampiri,
+Dalam luka tetap ada arti,
+Ssperti bintang redup di langit sunyi,
+Tak hilang, hanya sembunyi. `
+            },
+            {
+              id: 26,
+              title:"Jejak Waktu",
+              author:"Mu Fahri",
+              category:"kehidupan",
+              preview:"Dalam detik yang tak terganti, Kenangan bernyanyi lirih sekali, Bagai angin malam menyapa hati,",
+              content:`
+Dalam detik yang tak terganti,
+Kenangan bernyanyi lirih sekali,
+Bagai angin malam menyapa hati,
+Lembut, senyap, namun abadi.
+
+Pernah kita kecil, bebas berlari,
+Namun dewasa datang mengetuk sunyi,
+Meski langkah terasa letih berdiri,
+Jiwa mencari terang sejati.
+
+Hidup tak hanya luka semata,
+Ada indah singgah di sela cerita,
+Seperti bintang jatuh di langit maya,
+Sebentar hadir, selamanya terasa.`
+            },
+            {
+              id: 27,
+              title:"Rindu Masa Kecil",
+              author:"Mu Fahri",
+              category:"kehidupan",
+              preview:"Ada masa yang sering datang di ingatan, Hari-hari ringan penuh tawa dan permainan...",
+              content:`Ada masa yang sering datang di ingatan, Hari-hari ringan penuh tawa dan permainan,
+Langkah kecil berlari tanpa tujuan,
+Seakan dunia hanya tentang kebebasan.
+
+Dulu aku ingin cepat menjadi dewasa,
+Membayangkan hidup penuh warna,
+Namun kini kusadari, semua berbeda,
+Dewasa hadir membawa luka dan resah yang tak terduga.
+
+Betapa lucu janji pada diriku sendiri,
+Ingin bergegas, ingin segera berdiri,
+Padahal masa kecil adalah harta sejati,
+Yang kini hanya bisa kuingat di sudut hati.
+
+Waktu berjalan, tak mungkin kembali,
+Arusnya deras, tak bisa ku lawan lagi,
+Yang tersisa hanyalah kenangan abadi,
+Tentang tawa, tentang cahaya, tentang aku yang murni.
+
+Kadang aku ingin kembali sebentar,
+Menyentuh lagi hari-hari yang sabar,
+Namun kutahu itu hanyalah mimpi samar,
+Maka biarlah rindu ini jadi lentera yang berputar.
+
+Sebab meski masa kini tak seindah bayangan,
+Aku masih punya sisa ingatan,
+Bahwa di balik gelapnya perjalanan,
+Ada jiwa kecilku yang tetap jadi teman. `
+            },
+            {
+              id: 28,
+              title:"Sayap yang tak di izinkan terbang",
+              author:"Mu Fahri",
+              category:"kehidupan",
+              preview:"Di bawah gelapnya langit malam, seseorang menatap sebuah cock sebagai teman",
+              content:`Di bawah gelapnya langit malam  
+Seseorang menatap sebuah cock sebagai teman  
+Dulu jemari kecilnya menggapai harap  
+Namun suara rumah menahan sayap
+
+Hari berlalu, tubuhnya tumbuh dan dewasa  
+Mimpi menjadi atlet itu tetap bersemayam di dada  
+Terlambat, pikirnya, langkah terasa lelah  
+Impiannya tersisa rindu dan kenangan indah
+
+Namun dalam hati masih ada semangat yang tak pernah padam  
+Ada harapan yang terus berjuang  
+Masih ada impian yang sesekali mengambang  
+Yang setiap malam diam-diam ia bayangkan
+
+Tapi akhirnya ia belajar mengikhlaskan  
+Mencoba melepaskan semua beban dan harapan  
+Mencoba menjalani realita kehidupan
+Dengan penuh harap dan tujuan yg berlainan.`
+            },
+            {
+              id: 29,
+              title:"Kau yang tak Pernah Tau Puisiku",
+              author:"Mu Fahri",
+              category:"cinta",
+              preview:"Kupahat namanya dalam tiap larik, meski ia tak pernah tahu aku menulis...",
+              content:`Kupahat namanya dalam tiap larik, meski ia tak pernah tahu aku menulis, dan jika tahu pun-barangkali tak peduli, sebab aku hanya bayang samar di kerumunan perhatiannya yang tak pernah mengarah padaku.
+
+la tersenyum dan seluruh dunia dalam dadaku porak poranda, namun baginya, itu hanya kebiasaan biasa. bukan isyarat, bukan panggilan.
+
+Aku mencintainya dalam sunyi yang nyaring, dalam tulisan yang tak pernah kukirim, dalam doa yang tak menyebut nama, tapi takdir tahu, hatiku selalu menyebutnya lebih dulu.
+
+Setiap kata yang kutulis tentangnya, adalah luka yang kubungkus jadi puisi, agar tak terlihat menyedihkan meski sebenarnya, tiap baitnya adalah tangis yang kusembunyikan dari dunia.
+
+Dan pada akhirnya, aku sadar: ia hanyalah tokoh dalam ceritaku, yang tak pernah datang ke panggung nyata, yang tak pernah tahu bahwa dibalik puisi paling indahku, terkubur rasa yang tak pernah bisa pulang.`
+            },
+            {
+              id: 30,
+            title:"Langit Punya Rahasia",
+            author:"Mu Fahri",
+            category:"Alam",
+            preview:"Langit itu indah, ya....",
+            content:`Langit itu indah, ya....
+            selalu tampak tenang di atas sana.
+Tapi siapa yang tahu
+apa yang disembunyikannya di balik warna biru itu?
+Ada awan yang tak jadi hujan,
+ada petir yang mengendap dalam sunyi,
+ada rahasia yang disimpan dalam senyap
+karena langit pun tahu....
+tak semua tangis harus turun ke bumi.
+
+Seperti kita.
+Kita yang tertawa saat hati sedang kosong, bercanda padahal dada sudah nyeri.
+Kita yang pura-pura paham,
+padahal bahkan pada diri sendiri
+tak tahu harus menjawab apa.
+
+Langit punya rahasia,
+dan kita juga.
+Bedanya, langit tak perlu menjelaskan,
+dan kita.....
+terlalu sering memaksa diri untuk tetap terlihat terang.`
+            },
+            {
+              id: 31,
+              title:"Biarkan tuhan mengatur segalanya",
+              author:"Mu Fahri",
+              category:"kehidupan",
+              preview:"Menjauh untuk menjaga, berdo'a untuk menyapa, Aku mencintaimu dengan cara paling sederhana...",
+              content:`Menjauh untuk menjaga, berdo'a untuk menyapa. 
+Aku mencintaimu dengan cara paling sederhana
+Melalui do'a yang kutitipkan di antara degup hati, bukan meminta agar di takdirkan
+Tetapi aku titipkan do'a agar bahagia, hati, iman, dan senyummu tetap terjaga.
+
+Tidak menyapa bukan tidak peduli
+Aku hanya tidak ingin hasrat nafsuku mengotori hati ini 
+Disaat semuanya masih tampak abu abu
+Disaat belum waktunya rasa ini untuk berlabuh
+
+
+Kutitipkan segala yang ingin ku ucapkan padamu
+Melalui pemilik hatimu
+Agar Dia meniupkan pada hatimu
+Bahwa aku akan terus berjuang untukmu
+
+Menjauh bukan berarti tidak menginginkan
+Tetapi aturan-Nya harus lebih dulu ku dahulukan
+Mengejar cinta-Nya harus lebih ku utamakan
+Dibanding mengejarmu yang masih menjadi harapan
+
+Percaya bahwa yang akan menjadi milikku tak akan melewatiku
+Sekalipun jalannya rumit untuk menemukanku
+Dia akan tetap sampai kepada tanganku
+Karna Tuhan tau apa yg pantas untukku
+
+Aku serahkan rasa ini kepada sang pemilik hati
+Agar tetap suci dalam penjagaan-Nya
+Biarkanlah Dia mengatur semuanya
+Dan aku bersiap memperbaiki agar nanti siap untuk melabuhkan hati. 
+
+Sekalipun nanti semesta tak memberi izin untukku melabuhkan rasa ini
+Aku akan tetap berdo'a agar dirimu mendapat cinta yang lebih sepadan
+Mencintai tak seharusnya memiliki
+Mengikhlaskan juga sebagian dari cinta, bukankah begitu?...`           },
+            {
+              id: 32,
+              title:"Segala Adalah Kamu",
+              author:"Mu Fahri",
+              category:"cinta",
+              preview:"Tanpa sadar Di setiap bait yang kutulis kau selalu hadir...",
+              content:`Tanpa sadar
+Di setiap bait yang kutulis kau selalu hadir
+Dari lembar pertama yang kupeluk dengan tangan gemetar
+Hingga titik terakhir yang kupaksakan lahir dari mata yang berpendar
+Semuanya perihal kamu.
+
+Kamu tinggal di baris pertama, pada kata kedua, di koma yang kupilih dengan ragu
+Kau singgah di jeda, bersembunyi dibalik spasi
+Menjadi alasan setiap kalimatku berdiri 
+Meski aku runtuh di antaranya.
+
+Kau adalah wujud dari kata indah itu
+Butuh fokus untuk merangkai, butuh tenang untuk merawat, butuh keberanian untuk mengaku
+Bahwa di antara ribuan kata aku hanya menulis satu nama....itulah kamu.
+
+Jika kelak bait ini usang dan kertasnya sobek oleh waktu
+Percayalah, aku masih akan menulismu
+Di detak nadiku, di sunyi yang menua bersama rindu
+Karena segalanya adalah kamu. 
+Titik, koma, dan aku...selalu kamu.`
+            },
+            {
+              id: 33,
+              title:"Mimpi",
+              author:"Mu Fahri",
+              category:"kehidupan",
+              preview:"Semuanya bermula ketika pertama kali aku melihatnya, Segalanya tampak indah dan terasa mudah",
+              content:`Semuanya bermula ketika pertama kali aku melihatnya
+Segalanya tampak indah dan terasa mudah
+Namun semakin waktu menjala segala yg terasa mudah kini berubah
+Segala yang tadinya kudambakan kini mulai berubah menjadi angan
+
+Begitulah tadinya impianku yang begitu indah
+Saking indah aku bisa membuat orang di sekitarku menjadi bahagia
+Namun ternyata semua itu hanya menjadi angan2 belaka
+
+Segala mimpi  yang dulu ku harapkan kini mulai menghilang
+Tergerus oleh waktu yang terus menerjang
+Mulai memudar bagai kain yg telah usang
+Menjadi Mimpi yang sudah lagi tak diimpikan
+Menjadi harapan yg tak lagi di harapkan
+
+Sejauh ini 
+Tak ada keberanian yg perlu di sesali
+Berhasil atau gagal pun sudah dipetik maknanya
+Masih di tempat ini dengan keberanian yg tersisa
+Namun kenyataan lebih tau bahwa semuanya tak mampu di terima
+
+Meski begitu akan kubiarkan ingatan ini membekas
+Sebagai cerita yg membuatku jadi aktor utamanya`
+
+            },
+            {
+              id: 34,
+              title:"Jika Kita Akhirnya Bersama",
+              author:"Mu Fahri",
+              category:"cinta",
+              preview:"Dan pada akhirnya, setelah semua kesalahpahaman, luka yang tak terucap, malam-malam yang penuh tanya...",
+              content:`Dan pada akhirnya, setelah semua kesalahpahaman, luka yang tak terucap, malam-malam yang penuh tanya, dan jarak yang sempat membuatku percaya bahwa kita tak ditakdirkan, aku berdiri di sisimu-bukan karena kebetulan, bukan karena keberuntungan, tapi karena kita memilih untuk tetap percaya; karena kita terus melangkah, bahkan saat dunia berkata tidak. Kini aku tahu, cinta sejati bukan tentang siapa yang datang paling cepat, tapi siapa yang tetap tinggal, dan mencinta dengan keberanian hingga akhir.`
+            },
+            {
+              id: 35,
+              title:"Tatapan teduh",
+              author:"Mu Fahri",
+              category:"cinta",
+              preview:"Siapa yang tak luluh dengan tatapan teduh itu? Membuatku mulai berpikir... ",
+              content:`Siapa yang tak luluh dengan tatapan teduh itu? 
+Membuatku mulai berpikir... 
+Kamu terlalu indah untuk kujamah dengan cara yang salah
+Terlalu suci untuk kukejar sebagai milik disaat tuhan belum merestui
+Terlalu bernilai untuk kudekati tanpa niat yang utuh, tanpa keberanian yang jelas
+Kamu sangat indah hingga keindahan mu memperbaiki diriku
+Membuatku merayu sang maha indah
+Ya Allah jika Kau izinkan bagaimana jika teduhnya mata hamba-Mu menjadi tatapan halal yg kutatap suatu saat? 
+Dia adalah keindahan yg tak pernah membutuhkan sorotan 
+Laksana berlian yang tersembunyi di kedalaman lautan
+Dia yg bersinal dalam keheningan
+Dengan hati yang kuat dan jiwa yang penuh keberanian`
+            }
+          
+        ];
+        
+        // Three.js Bg
+        class ParticleBackground {
+            constructor() {
+                this.container = document.getElementById('canvas-container');
+                this.mouse = new THREE.Vector2();
+                this.targetMouse = new THREE.Vector2();
+                
+                this.init();
+                this.createParticles();
+                this.animate();
+                this.addEventListeners();
+            }
+            
+            init() {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.z = 50;
+                
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.container.appendChild(this.renderer.domElement);
+            }
+            
+            createParticles() {
+                const particleCount = 800;
+                const positions = new Float32Array(particleCount * 3);
+                const colors = new Float32Array(particleCount * 3);
+                const sizes = new Float32Array(particleCount);
+                
+                const goldColor = new THREE.Color(0xd4a853);
+                const warmColor = new THREE.Color(0xe8b86d);
+                const whiteColor = new THREE.Color(0xf5f0e6);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    positions[i * 3] = (Math.random() - 0.5) * 150;
+                    positions[i * 3 + 1] = (Math.random() - 0.5) * 150;
+                    positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+                    
+                    const colorChoice = Math.random();
+                    let color;
+                    if (colorChoice < 0.4) color = goldColor;
+                    else if (colorChoice < 0.7) color = warmColor;
+                    else color = whiteColor;
+                    
+                    colors[i * 3] = color.r;
+                    colors[i * 3 + 1] = color.g;
+                    colors[i * 3 + 2] = color.b;
+                    
+                    sizes[i] = Math.random() * 2 + 0.5;
+                }
+                
+                const geometry = new THREE.BufferGeometry();
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
+                geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
+                
+                const vertexShader = `
+                    attribute vec3 aColor;
+                    attribute float aSize;
+                    varying vec3 vColor;
+                    varying float vAlpha;
+                    
+                    void main() {
+                        vColor = aColor;
+                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                        float dist = length(mvPosition.xyz);
+                        vAlpha = smoothstep(100.0, 20.0, dist);
+                        gl_PointSize = aSize * (50.0 / -mvPosition.z);
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `;
+                
+                const fragmentShader = `
+                    varying vec3 vColor;
+                    varying float vAlpha;
+                    
+                    void main() {
+                        float dist = length(gl_PointCoord - vec2(0.5));
+                        if (dist > 0.5) discard;
+                        
+                        float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
+                        alpha *= vAlpha * 0.8;
+                        
+                        gl_FragColor = vec4(vColor, alpha);
+                    }
+                `;
+                
+                const material = new THREE.ShaderMaterial({
+                    vertexShader,
+                    fragmentShader,
+                    transparent: true,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+                
+                this.particles = new THREE.Points(geometry, material);
+                this.scene.add(this.particles);
+            }
+            
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                this.mouse.x += (this.targetMouse.x - this.mouse.x) * 0.05;
+                this.mouse.y += (this.targetMouse.y - this.mouse.y) * 0.05;
+                
+                const time = performance.now() * 0.0001;
+                
+                this.particles.rotation.x = Math.sin(time) * 0.1 + this.mouse.y * 0.2;
+                this.particles.rotation.y = Math.cos(time) * 0.1 + this.mouse.x * 0.2;
+                
+                const positions = this.particles.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i + 1] += Math.sin(time + positions[i] * 0.1) * 0.01;
+                }
+                this.particles.geometry.attributes.position.needsUpdate = true;
+                
+                this.renderer.render(this.scene, this.camera);
+            }
+            
+            addEventListeners() {
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+                
+                document.addEventListener('mousemove', (e) => {
+                    this.targetMouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                    this.targetMouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                });
+            }
+        }
+        
+        
+        new ParticleBackground();
+        
+        
+        class PoetryApp {
+            constructor() {
+                this.poems = poems;
+                this.currentFilter = 'semua';
+                this.searchQuery = '';
+                
+                this.grid = document.getElementById('poetryGrid');
+                this.modal = document.getElementById('modalOverlay');
+                this.searchInput = document.getElementById('searchInput');
+                this.filterBtns = document.querySelectorAll('.filter-btn');
+                this.readingToggle = document.getElementById('readingToggle');
+                
+                this.init();
+            }
+            
+            init() {
+                this.renderPoems();
+                this.addEventListeners();
+            }
+            
+            renderPoems() {
+                let filteredPoems = this.poems;
+                
+                if (this.currentFilter !== 'semua') {
+                    filteredPoems = filteredPoems.filter(p => p.category === this.currentFilter);
+                }
+                
+                if (this.searchQuery) {
+                    const query = this.searchQuery.toLowerCase();
+                    filteredPoems = filteredPoems.filter(p => 
+                        p.title.toLowerCase().includes(query) || 
+                        p.author.toLowerCase().includes(query)
+                    );
+                }
+                
+                if (filteredPoems.length === 0) {
+                    this.grid.innerHTML = `
+                        <div class="no-results">
+                            <h3>Tidak ada puisi ditemukan</h3>
+                            <p>Coba kata kunci atau kategori lain</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                this.grid.innerHTML = filteredPoems.map(poem => `
+                    <article class="poetry-card" data-id="${poem.id}">
+                        <span class="category">${this.getCategoryLabel(poem.category)}</span>
+                        <h3>${poem.title}</h3>
+                        <p class="author">${poem.author}</p>
+                        <p class="preview">${poem.preview}</p>
+                        <span class="read-more">Baca selengkapnya →</span>
+                    </article>
+                `).join('');
+                
+                // Add click events
+                document.querySelectorAll('.poetry-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const id = parseInt(card.dataset.id);
+                        this.openModal(id);
+                    });
+                });
+            }
+            
+            getCategoryLabel(category) {
+                const labels = {
+                    cinta: 'Cinta',
+                    alam: 'Alam',
+                    kehidupan: 'Kehidupan',
+                    kerinduan: 'Kerinduan'
+                };
+                return labels[category] || category;
+            }
+            
+            openModal(id) {
+                const poem = this.poems.find(p => p.id === id);
+                if (!poem) return;
+                
+                document.getElementById('modalCategory').textContent = this.getCategoryLabel(poem.category);
+                document.getElementById('modalTitle').textContent = poem.title;
+                document.getElementById('modalAuthor').textContent = poem.author;
+                
+                const contentEl = document.getElementById('modalContent');
+                const lines = poem.content.split('\n');
+                contentEl.innerHTML = lines.map((line, i) => 
+                    `<span class="line" style="animation-delay: ${i * 0.05}s">${line || '&nbsp;'}</span>`
+                ).join('');
+                
+                this.modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            closeModal() {
+                this.modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            addEventListeners() {
+                
+                this.searchInput.addEventListener('input', (e) => {
+                    this.searchQuery = e.target.value;
+                    this.renderPoems();
+                });
+                
+                
+                this.filterBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.filterBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentFilter = btn.dataset.filter;
+                        this.renderPoems();
+                    });
+                });
+                
+                
+                document.getElementById('closeModal').addEventListener('click', () => this.closeModal());
+                this.modal.addEventListener('click', (e) => {
+                    if (e.target === this.modal) this.closeModal();
+                });
+                
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeModal();
+                });
+                
+
+                this.readingToggle.addEventListener('click', () => {
+                    document.body.classList.toggle('reading-mode');
+                    const icon = document.getElementById('toggleIcon');
+                    const text = document.getElementById('toggleText');
+                    
+                    if (document.body.classList.contains('reading-mode')) {
+                        icon.textContent = '☀';
+                        text.textContent = 'Mode Normal';
+                    } else {
+                        icon.textContent = '☽';
+                        text.textContent = 'Mode Baca';
+                    }
+                });
+            }
+        }
+        
+        
+        new PoetryApp();
+    </script>
+</body>
+</html>
