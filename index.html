@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pustaka Puisi - SeorangAing</title>
+    <link rel="stylesheet" href="desen.css">
+    <style>
+        @import url ('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="content">
+        <header>
+            <h1 class="logo">PUSTAKA PUISI</h1>
+            <p class="tagline">Kumpulan Kata kata dan Puisi dari Seorang Aing</p>
+        </header>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Cari puisi atau penyair...">
+            </div>
+            <button class="filter-btn active" data-filter="semua">Semua</button>
+            <button class="filter-btn" data-filter="cinta">Cinta</button>
+            <button class="filter-btn" data-filter="Motivasi">Motivasi</button>
+            <button class="filter-btn" data-filter="kehidupan">Kehidupan</button>
+            <button class="filter-btn" data-filter="kerinduan">Kerinduan</button>
+            <button class="filter-btn" data-filter="alam">Alam</button>
+        </div>
+        
+        <main class="poetry-grid" id="poetryGrid">
+        </main>
+        
+        <footer>
+            <p>Pustaka Puisi mufhri 2026 </p>
+           <span><p class="letter-signature">~ Menyimpan Rasa, Mengabdikan Kata</p></span> 
+        </footer>
+    </div>
+    
+    <button class="reading-mode-toggle" id="readingToggle">
+        <span id="toggleIcon">☽</span>
+        <span id="toggleText">Mode Baca</span>
+    </button>
+    
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="category" id="modalCategory"></span>
+                <h2 id="modalTitle"></h2>
+                <p class="author" id="modalAuthor"></p>
+                <button class="close-btn" id="closeModal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="poem-content" id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    
+    <script type="module" src="isian.js"></script>
+</body>
+</html>
